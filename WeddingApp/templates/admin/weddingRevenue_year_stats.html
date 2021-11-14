@@ -1,0 +1,111 @@
+{% extends 'admin/base_site.html' %}
+
+{% block breadcrumbs %}
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    function randomColor(){
+        let r = parseInt(Math.random()*255);
+        let g = parseInt(Math.random()*255);
+        let b = parseInt(Math.random()*255);
+
+        return `rgb(${r}, ${g}, ${b})`
+    }
+
+    function weddingRevenue_year_chart(id, weddingRevenueYearInfo=[], weddingRevenueYearLabels=[]) {
+        let colors = []
+        for (let i = 0; i < weddingRevenueYearInfo.length; i++)
+
+        colors.push(randomColor())
+        const data = {
+           labels: weddingRevenueYearLabels,
+          datasets: [{
+            label: 'Thống kê doanh thu theo năm',
+            data: weddingRevenueYearInfo,
+            backgroundColor: colors,
+            hoverOffset: 4
+          }]
+        };
+
+        const config = {
+          type: 'bar',
+          data: data,
+        };
+
+        let ctx = document.getElementById(id).getContext("2d")
+
+        new Chart(ctx, config)
+    }
+</script>
+<script>
+
+</script>
+<script>
+    let weddingRevenueYearInfo=[], weddingRevenueYearLabels=[]
+    {% for w in weddingRevenue_year_stats %}
+        weddingRevenueYearInfo.push({{w.r}})
+        weddingRevenueYearLabels.push('{{w.year}}')
+    {% endfor %}
+    window.onload = function() {
+        weddingRevenue_year_chart("myWeddingStatsChart", weddingRevenueYearInfo, weddingRevenueYearLabels)
+    }
+</script>
+<div class="container">
+    <div class="row">
+        <div class="col-md-4 col-xs-12 bg-light">
+            <nav class="navbar bg-light">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <span class="text-danger">Thống kê mật độ tiệc cưới</span>
+                        <a class="nav-link" href="wedding-month-stats">Thống kê mật độ tiệc cưới theo tháng</a>
+                        <a class="nav-link" href="wedding-year-stats">Thống kê mật độ tiệc cưới theo năm</a>
+                    </li>
+                    <li class="nav-item">
+                        <span class="text-danger">Thống kê doanh thu</span>
+                        <a class="nav-link" href="weddingRevenue-month-stats">Thống kê doanh thu theo tháng</a>
+                        <a class="nav-link" href="weddingRevenue-year-stats">Thống kê doanh thu theo năm</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="col-md-8 col-xs-12">
+            <h3 class="text-center text-info">Thống kê doanh thu theo năm</h3>
+            <form action = "" method = "POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Từ ngày</label>
+                    <input type="date" class="form-control" name="fromDate" />
+                </div>
+                <div class="form-group">
+                    <label>Đến ngày</label>
+                    <input type="date" class="form-control" name="toDate" />
+                </div>
+                <input type="submit" value="Lọc" class="btn btn-success">
+            </form>
+            <div>
+                <canvas id="myWeddingStatsChart"></canvas>
+            </div>
+            <table class="table">
+                <tr>
+                    <th>Năm</th>
+                    <th>Doanh thu</th>
+                </tr>
+                {% for w in weddingRevenue_year_stats %}
+                <tr>
+                    <td>{{w.year}}</td>
+                    {% load humanize %}
+                    <td>{{w.r|intcomma}} VNĐ</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
